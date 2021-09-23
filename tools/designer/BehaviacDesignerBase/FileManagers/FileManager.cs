@@ -162,14 +162,17 @@ namespace Behaviac.Design.FileManagers
             return SaveResult.Succeeded;
         }
 
-        public static string GetRelativePath(string fullpath)
+        public static string GetRelativePath(string fullpath, bool excludeExt = true)
         {
             Debug.Check(Workspace.Current != null && !string.IsNullOrEmpty(Workspace.Current.SourceFolder));
 
             string wksPath = Path.GetFullPath(Workspace.Current.SourceFolder);
             fullpath = MakeRelative(wksPath, fullpath);
             fullpath = fullpath.Replace("\\", "/");
-            fullpath = fullpath.Replace(".xml", "");
+            if (excludeExt)
+            {
+                fullpath = fullpath.Replace(".xml", "");
+            }
 
             return fullpath;
         }

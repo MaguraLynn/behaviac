@@ -114,6 +114,11 @@ namespace Behaviac.Design
             }
         }
 
+        internal static int GetCurrentFrame()
+        {
+            return _timelineDock != null ? _timelineDock.trackBar.Value : 0;
+        }
+
         internal static void SetTotalFrame(int totalFrame, int firstFrame = -1)
         {
             if (_timelineDock != null)
@@ -156,7 +161,7 @@ namespace Behaviac.Design
                             }
                         }
 
-                        _timelineDock.updateHighlights(agentName, frame, transitionIds, highlightNodeIds, updatedNodeIds, breakPoint, profileInfos);
+                        //_timelineDock.updateHighlights(agentName, frame, transitionIds, highlightNodeIds, updatedNodeIds, breakPoint, profileInfos);
 
                         if (breakPoint != null)
                         {
@@ -277,12 +282,16 @@ namespace Behaviac.Design
             string typeName = (agentType == null) ? agentName : agentType.ToString();
             string agentFullname = (agentType == null) ? agentName : agentType.ToString() + "#" + agentName;
             string behaviorFilename = FrameStatePool.GetBehaviorFilename(agentFullname, frame);
-            BehaviorNode behavior = null;
-
-            if (agentFullname == Plugin.DebugAgentInstance)
+            BehaviorNode behavior = BehaviorManager.Instance.GetBehavior(behaviorFilename);
+            if(behavior == null)
             {
-                behavior = UIUtilities.ShowBehavior(behaviorFilename);
+                return;
             }
+
+            //if (agentFullname == Plugin.DebugAgentInstance)
+            //{
+            //    behavior = UIUtilities.ShowBehavior(behaviorFilename);
+            //}
 
             List<AgentDataPool.ValueMark> values = AgentDataPool.GetValidValues(agentType, agentFullname, frame);
 
