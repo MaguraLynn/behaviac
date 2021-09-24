@@ -254,8 +254,8 @@ namespace Behaviac.Design.Data
         }
 
         // key : agentName
-        private static Dictionary<string, List<FrameState>> _frameStates = new Dictionary<string, List<FrameState>>();
-        public static Dictionary<string, List<FrameState>> FrameStates
+        private static Dictionary<Key, List<FrameState>> _frameStates = new Dictionary<Key, List<FrameState>>();
+        public static Dictionary<Key, List<FrameState>> FrameStates
         {
             get
             {
@@ -745,12 +745,13 @@ namespace Behaviac.Design.Data
 
         public static List<string> GetHighlightNodeIds(string agentFullName, int frame, string behaviorFilename)
         {
-            if (!_frameStates.ContainsKey(agentFullName))
+            var key = new Key(agentFullName, behaviorFilename);
+            if (!_frameStates.ContainsKey(key))
             {
                 return null;
             }
 
-            List<FrameState> frameStates = _frameStates[agentFullName];
+            List<FrameState> frameStates = _frameStates[key];
             int index = findNearestFrame(frameStates, frame);
 
             if (index < 0)
@@ -770,12 +771,13 @@ namespace Behaviac.Design.Data
 
         private static FrameState getFrameState(string agentFullName, int frame, string behaviorFilename)
         {
-            if (!_frameStates.ContainsKey(agentFullName))
+            var key = new Key(agentFullName, behaviorFilename);
+            if (!_frameStates.ContainsKey(key))
             {
                 return null;
             }
 
-            List<FrameState> frameStates = _frameStates[agentFullName];
+            List<FrameState> frameStates = _frameStates[key];
             int index = findFrame(frameStates, frame);
 
             if (index < 0)
@@ -815,7 +817,8 @@ namespace Behaviac.Design.Data
 
         public static string GetBehaviorFilename(string agentFullName, int frame)
         {
-            if (!string.IsNullOrEmpty(agentFullName) && frame > -1)
+            return GetTopBehaviorTree(agentFullName);
+            /*if (!string.IsNullOrEmpty(agentFullName) && frame > -1)
             {
                 if (!_frameStates.ContainsKey(agentFullName))
                 {
@@ -833,7 +836,7 @@ namespace Behaviac.Design.Data
                 return frameStates[index].BehaviorFilename;
             }
 
-            return null;
+            return null;*/
         }
 
         #region Planning
@@ -1262,15 +1265,16 @@ namespace Behaviac.Design.Data
                 return null;
             }
 
-            if (!_frameStates.ContainsKey(agentFullName))
+            var key = new Key(agentFullName, behaviorFilename);
+            if (!_frameStates.ContainsKey(key))
             {
-                _frameStates[agentFullName] = new List<FrameState>();
+                _frameStates[key] = new List<FrameState>();
             }
 
             FrameState frameState = null;
-            List<FrameState> frameStates = _frameStates[agentFullName];
-            int index = findFrame(frameStates, frame);
-
+            var frameStates = _frameStates[key];
+            int index= findFrame(frameStates, frame);
+            
             if (index < 0)
             {
                 frameState = new FrameState();
@@ -1373,9 +1377,40 @@ namespace Behaviac.Design.Data
         {
             Clear();
 
-            _frameStates = formatter.Deserialize(stream) as Dictionary<string, List<FrameState>>;
+            _frameStates = formatter.Deserialize(stream) as Dictionary<Key, List<FrameState>>;
             _nodeFrameProfiles = formatter.Deserialize(stream) as Dictionary<string, Dictionary<string, NodeProfileInfos>>;
             _appLogs = formatter.Deserialize(stream) as Dictionary<int, Dictionary<string, List<string>>>;
+        }
+
+        [Serializable]
+        public class Key
+        {
+            private string agentName, treeName;
+
+            public Key(string agentName, string treeName)
+            {
+                this.treeName = treeName;
+                this.agentName = agentName;
+            }
+
+            public bool Equals(Key other)
+            {
+                if (other == null)
+                {
+                    return false;
+                }
+                return treeName == other.treeName && agentName == other.agentName;
+            }
+
+            public override bool Equals(object other)
+            {
+                return Equals(other as Key);
+            }
+
+            public override int GetHashCode()
+            {
+                return treeName.GetHashCode() ^ agentName.GetHashCode();
+            }
         }
     }
 }

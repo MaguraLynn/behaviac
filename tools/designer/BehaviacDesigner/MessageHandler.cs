@@ -485,7 +485,7 @@ namespace Behaviac.Design
                     checkBehaviorFiles(behaviorFilename);
                     FrameStatePool.SetJumpInfo(agentFullname, behaviorFilename, true);
 
-                    behaviorFilename = FrameStatePool.GetCurrentBehaviorTree(agentFullname, behaviorFilename);
+                    //behaviorFilename = FrameStatePool.GetCurrentBehaviorTree(agentFullname, behaviorFilename);
 
                     string[] actions = nodes[1].Split(new char[] { '[', ']' }, StringSplitOptions.RemoveEmptyEntries);
 
