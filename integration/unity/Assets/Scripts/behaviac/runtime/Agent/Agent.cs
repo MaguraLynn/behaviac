@@ -1373,23 +1373,36 @@ namespace behaviac
 #if !BEHAVIAC_RELEASE
             if (Config.IsLoggingOrSocketing && this.m_currentBT != null)
             {
-                List<BehaviorTask> runningNodes = this.m_currentBT.GetRunningNodes(false);
-                var e = runningNodes.GetEnumerator();
-
-                while (e.MoveNext())
-                {
-                    BehaviorTask behaviorTask = e.Current;
-                    string btStr = BehaviorTask.GetTickInfo(this, behaviorTask, "enter");
-
-                    //empty btStr is for internal BehaviorTreeTask
-                    if (!string.IsNullOrEmpty(btStr))
-                    {
-                        LogManager.Instance.Log(this, btStr, EActionResult.EAR_success, LogMode.ELM_tick);
-                    }
-                }
+                logRunningNodes(this.m_currentBT);
             }
 #endif
         }
+
+#if !BEHAVIAC_RELEASE
+        private void logRunningNodes(BehaviorTask rootNode)
+        {
+            List<BehaviorTask> runningNodes = rootNode.GetRunningNodes(false);
+            var e = runningNodes.GetEnumerator();
+
+            while (e.MoveNext())
+            {
+                BehaviorTask behaviorTask = e.Current;
+                string btStr = BehaviorTask.GetTickInfo(this, behaviorTask, "enter");
+
+                //empty btStr is for internal BehaviorTreeTask
+                if (!string.IsNullOrEmpty(btStr))
+                {
+                    LogManager.Instance.Log(this, btStr, EActionResult.EAR_success, LogMode.ELM_tick);
+                }
+
+                if(behaviorTask != rootNode && behaviorTask is ReferencedBehavior.ReferencedBehaviorTask)
+                {
+                    var n = behaviorTask as ReferencedBehavior.ReferencedBehaviorTask;
+                    logRunningNodes(n.m_subTree);
+                }
+            }
+        }
+#endif
 
 #if !BEHAVIAC_RELEASE
         public int m_debug_in_exec;

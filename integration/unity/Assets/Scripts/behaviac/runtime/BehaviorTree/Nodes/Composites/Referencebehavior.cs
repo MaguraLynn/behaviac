@@ -234,7 +234,7 @@ namespace behaviac
                 return m_nextStateId;
             }
 
-            BehaviorTreeTask m_subTree = null;
+            public BehaviorTreeTask m_subTree {get; private set;}
 
             public override bool onevent(Agent pAgent, string eventName, Dictionary<uint, IInstantiatedVariable> eventPrams)
             {
